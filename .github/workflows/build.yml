@@ -1,0 +1,22 @@
+name: Build Windows app
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pyinstaller
+      - run: pyinstaller --onefile --windowed --icon SpaceUnpack.ico --add-data "SpaceUnpack.ico;." --name SpaceUnpack spaceunpack_gui.py
+      - run: choco install innosetup -y --no-progress
+      - run: '& "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" SpaceUnpack.iss'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SpaceUnpack-Setup
+          path: installer/SpaceUnpack-Setup.exe
